@@ -9,7 +9,7 @@
  * drawn but that is not the case. What's really happening is the entire "scene"
  * is being drawn over and over, presenting the illusion of animation.
  *
- * This engine makes the canvas' context (ctx) object globally available to make 
+ * This engine makes the canvas' context (ctx) object globally available to make
  * writing app.js a little simpler to work with.
  */
 
@@ -94,6 +94,9 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update();
+        items.forEach(function(e) {
+            e.update(dt);
+        });
     }
 
     /* This function initially draws the "game level", it will then call
@@ -117,7 +120,7 @@ var Engine = (function(global) {
             numRows = 6,
             numCols = 5,
             row, col;
-        
+
         // Before drawing, clear existing canvas
         ctx.clearRect(0,0,canvas.width,canvas.height)
 
@@ -134,6 +137,8 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
+
+                // original step 101 x 83
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }
@@ -154,6 +159,9 @@ var Engine = (function(global) {
         });
 
         player.render();
+        items.forEach(function (e) {
+          e.render();
+        })
     }
 
     /* This function does nothing but it could have been a good place to
@@ -162,6 +170,12 @@ var Engine = (function(global) {
      */
     function reset() {
         // noop
+        // console.log(this);
+        //  if (player.crash == 0) {
+        //    console.log("you will survive");
+        //  } else {
+        //    init();
+        //  }
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -173,7 +187,18 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/Gem Blue.png',
+        'images/Gem Green.png',
+        'images/Gem Orange.png',
+        'images/Rock.png',
+        'images/Heart.png',
+        'images/Key.png',
+        'images/dummy.png'
+
+
+
+
     ]);
     Resources.onReady(init);
 
