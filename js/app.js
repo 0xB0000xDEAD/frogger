@@ -60,7 +60,8 @@ Enemy.prototype.render = function() {
 class Player {
   constructor(name) {
     this.name = name
-    this.sprite = 'images/char-boy.png'
+    this.players = ['char-boy', 'char-cat-girl', 'char-horn-girl', 'char-pink-girl', 'char-princess-girl'];
+    this.sprite = `images/${this.players[0]}.png`;
     this.yOffset = 10;
     this.heigth = 83;
     this.width = 101;
@@ -69,6 +70,12 @@ class Player {
     this.x = 0; //in pixel! vedi canvas dimensions
     this.y = this.y0;
     this.crash = 0;
+  }
+  switchPlayer() {
+    let firstOut = this.players.shift();
+    console.log(firstOut);
+    this.players.push(firstOut);
+    this.sprite = `images/${this.players[0]}.png`;
   }
   render() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -82,8 +89,23 @@ class Player {
         console.log('collision at: ' + (e.x + 101).toString());
         player.resetPlayer();
       }
-      if (false) {
-        this.resetPlayer();
+      if (player.y == -player.yOffset) {
+        // player.sprite = 'images/dummy.png';
+        function blink() {
+           player.sprite = (player.sprite == 'images/char-boy') ?  'images/dummy.png' : 'images/char-boy.png';
+        }
+        let intervalId = setInterval(blink, 300);
+        function stopBlink() {
+          console.log('stopped blink');
+          clearInterval(intervalId);
+        }
+         let timeoutId = setTimeout(stopBlink, 1000);
+
+
+        // let delayId = window.setTimeout(function() {
+        //   player.sprite = 'images/char-boy.png';
+        //   player.resetPlayer();
+        // }, 500);
       }
     })
   }
@@ -126,6 +148,9 @@ class Player {
           // console.log(this.y);
           break;
         }
+      case 'switchPlayer':
+        console.log('cambia player');
+        this.switchPlayer();
       default:
     }
   }
@@ -149,13 +174,12 @@ class Goodies {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y, this.width, this.heigth);
   }
   update() {
-    items.forEach(function(e) {
-      // console.log((player.x + player.collisionOffset < (e.x + 101) && player.x + player.collisionOffset + 101 > e.x) && (e.y == player.y - player.yOffset));
-      // TODO: set the right collision head to head
-      if ((player.x + player.collisionOffset < (e.x + 101) && player.x + player.collisionOffset + 101 > e.x) && (e.y == player.y - player.yOffset)) {
-        // debug the collision point
-        console.log('collision at: ' + (e.x + 101).toString());
-        this.collisionHandle();
+    let myThis = this;
+    items.forEach.call(myThis, function(e) {
+      if (true) {
+        console.log(this);
+        this.handleCollision();
+        //debug
       }
     })
   }
@@ -183,15 +207,13 @@ function populateEnemies() {
 populateEnemies();
 const items = [];
 let itemSet = new Set();
-
-while (itemSet.size < 10) {
+while (itemSet.size < 5) {
   var item = {};
   item.row = getRandomIntInclusive(1, 3);
   item.col = getRandomIntInclusive(0, 4);
   itemSet.add(item);
 }
 let iterator = itemSet.values();
-
 console.log(itemSet);
 const possibleItems = ['Gem Orange', 'Gem Green', 'Gem Blue'];
 
@@ -199,19 +221,14 @@ function dropItem() {
   let position = iterator.next();
   // console.log(position.done);
   console.log(position.value);
-  if(!position.done) {
+  if (!position.done) {
     let type = possibleItems[getRandomIntInclusive(0, possibleItems.length - 1)];
     console.log(type);
     // items.push(new Goodies(type, iterator.next().value.row, iterator.next().value.col))
     items.push(new Goodies(type, position.value.row, position.value.col))
-  } else {
-
-  }
-
+  } else {}
 }
 dropItem();
-
-
 // console.log(items);
 const kindOfGems = new Set(['Gem Blue', 'Gem Orange', 'Gem Green']);
 var player = new Player('sergio');
@@ -220,11 +237,13 @@ var player = new Player('sergio');
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
+  console.log(e.keyCode);
   var allowedKeys = {
     37: 'left',
     38: 'up',
     39: 'right',
-    40: 'down'
+    40: 'down',
+    80: 'switchPlayer'
   };
   // console.log(allowedKeys[e.keyCode]);
   player.handleInput(allowedKeys[e.keyCode]);

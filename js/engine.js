@@ -188,12 +188,17 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/char-pink-girl.png',
+        'images/char-princess-girl.png',
         'images/Gem Blue.png',
         'images/Gem Green.png',
         'images/Gem Orange.png',
         'images/Rock.png',
         'images/Heart.png',
         'images/Key.png',
+        'images/Selector.png',
         'images/dummy.png'
 
 
