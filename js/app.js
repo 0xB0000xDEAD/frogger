@@ -1,5 +1,3 @@
-const spriteWidth = 101;
-const spriteHeigth = 171;
 // random generator function
 function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
@@ -10,60 +8,59 @@ function getRandomIntInclusive(min, max) {
 function jam() {
   addEnemy();
 }
-// Enemies our player must avoid
-var Enemy = function() {
-  // Variables applied to each of our instances go here,
-  // we've provided one for you to get started
-  // The image/sprite for our enemies, this uses
-  // a helper we've provided to easily load images
-  this.sprite = 'images/enemy-bug.png';
-  this.yOffset = 20;
-  this.x = 0;
-  this.y = 0 - this.yOffset;
-  this.speed = 1;
-};
-// randomize the starting point for the enemy
-Enemy.prototype.randomize = function() {
-  this.x = getRandomIntInclusive(0, 4) * 101;
-  this.y = getRandomIntInclusive(1, 3) * 83 - this.yOffset;
-  this.speed = getRandomIntInclusive(1, 10);
-};
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
-Enemy.prototype.update = function(dt) {
-  let endGameField = 505;
-  if (this.x > endGameField) {
-    this.x = -200;
+class Core {
+  constructor(sprite, x, y) {
+    this.sprite = sprite;
+    this.x = x;
+    this.y = y;
   }
-  this.x += this.speed * 40 * dt;
-  // You should multiply any movement by the dt parameter
-  // which will ensure the game runs at the same speed for
-  // all computers.
-};
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-class Player {
+  // Draw the enemy on the screen, required method for game
+  render() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+  }
+}
+class Enemy extends Core {
+  constructor() {
+    super();
+    // Variables applied to each of our instances go here,
+    // we've provided one for you to get started
+    // The image/sprite for our enemies, this uses
+    // a helper we've provided to easily load images
+    this.sprite = 'images/enemy-bug.png';
+    this.yOffset = 20;
+    this.speed = 1;
+  }
+  // randomize the starting point for the enemy
+  randomize() {
+    this.x = getRandomIntInclusive(0, 4) * 101;
+    this.y = getRandomIntInclusive(1, 3) * 83 - this.yOffset;
+    this.speed = getRandomIntInclusive(1, 10);
+  }
+  // Update the enemy's position, required method for game
+  // Parameter: dt, a time delta between ticks
+  update(dt) {
+    let endGameField = 505;
+    if (this.x > endGameField) {
+      this.x = -200;
+    }
+    // You should multiply any movement by the dt parameter
+    // which will ensure the game runs at the same speed for
+    // all computers.
+    this.x += this.speed * 40 * dt;
+  }
+}
+class Player extends Core {
   constructor(name) {
+    super();
     this.name = name;
-    this.skins = [
-      'char-boy',
-      'char-cat-girl',
-      'char-horn-girl',
-      'char-pink-girl',
-      'char-princess-girl'
-    ];
+    this.skins = ['char-boy', 'char-cat-girl', 'char-horn-girl', 'char-pink-girl', 'char-princess-girl'];
     this.sprite = `images/${this.skins[0]}.png`;
     this.yOffset = 10;
     this.heigth = 83;
     this.width = 101;
-    this.collisionOffset = 15;
+    this.collisionOffset = 20;
     this.y0 = this.heigth * 5 - this.yOffset;
-    this.x = 0; //in pixel! vedi canvas dimensions
+    this.x = 0;
     this.y = this.y0;
     this.oneTimeFlag = 0;
   }
@@ -73,8 +70,11 @@ class Player {
     this.skins.push(firstOut);
     this.sprite = `images/${this.skins[0]}.png`;
   }
-  render(data) {
+  render() {
+    ctx.fillStyle = 'black';
+    ctx.font = '20px serif';
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    ctx.fillText(outputText, xMsg, yMsg);
   }
   //ending animation
   onWater() {
@@ -83,10 +83,10 @@ class Player {
     // the following while loop ensures the ending animtion start
     // only one time till the game rest
     while (this.oneTimeFlag == 0) {
+      message('water is so blue...', 10, 600);
       // a transparent skin (dummy.png) makes the player blink when you win the game
       let intervalId = setInterval(() => {
-        this.sprite =
-          this.sprite == currentSkin ? 'images/dummy.png' : currentSkin;
+        this.sprite = this.sprite == currentSkin ? 'images/dummy.png' : currentSkin;
       }, 200);
       this.oneTimeFlag = 1;
       let timeoutId = setTimeout(() => {
@@ -97,13 +97,9 @@ class Player {
   }
   update() {
     allEnemies.forEach(e => {
-      if (
-        this.x + this.collisionOffset < e.x + 101 &&
-        this.x + this.collisionOffset + 101 > e.x &&
-        e.y == this.y - this.yOffset
-      ) {
+      if (this.x + this.collisionOffset < e.x + 101 && this.x + this.collisionOffset + 101 > e.x && e.y == this.y - this.yOffset) {
         // debug the collision point
-        //console.log("collision at: " + (e.x + 101).toString());
+        // console.log('collision at: ' + (e.x + 101).toString());
         this.reset(this.sprite);
       }
     });
@@ -122,7 +118,8 @@ class Player {
     this.sprite = currentSkin;
     allEnemies = [];
     items = [];
-    populateBoard();
+    populateEnemies();
+    populateItems();
   }
   handleInput(key) {
     switch (key) {
@@ -142,6 +139,7 @@ class Player {
         }
       case 'up':
         if (this.y == -10) {
+          player.onWater();
           break;
         } else {
           this.y -= this.heigth;
@@ -160,9 +158,28 @@ class Player {
     }
   }
 }
+let outputText = '';
+let xMsg = 0;
+let yMsg = 0;
+
+function message(string, x = 10, y = 40) {
+  xMsg = x;
+  yMsg = y;
+  ctx.fillStyle = 'black';
+  ctx.font = '30px serif';
+  let intervalId = setInterval(() => {
+    outputText = outputText == '' ? string : '';
+  }, 200);
+  let timeoutId = setTimeout(() => {
+    clearInterval(intervalId);
+    outputText = '';
+    xMsg, yMsg = 0;
+  }, 2000);
+}
 // items class
-class Goodies {
+class Goodies extends Core {
   constructor(id, type, row, col) {
+    super();
     this.id = id;
     this.type = type;
     this.sprite = `images/${this.type}.png`;
@@ -177,15 +194,9 @@ class Goodies {
     this.y = this.row * 83 - this.yOffset;
   }
   render() {
-    ctx.drawImage(
-      Resources.get(this.sprite),
-      this.x,
-      this.y,
-      this.width,
-      this.heigth
-    );
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y, this.width, this.heigth);
   }
-  update() {}
+  update(dt) {}
   handleCollision(id) {
     let temp = items.filter(e => {
       return !(e.id == id);
@@ -195,16 +206,19 @@ class Goodies {
       case 'Gem Blue':
         console.log('you hit a blue one\n no more headache! ');
         allEnemies = [];
+        message('you hit a blue one\n no more headache! ');
         break;
       case 'Gem Green':
         console.log('you hit a green one\n slooooow...');
         allEnemies.forEach(e => {
           e.speed--;
         });
+        message('you hit a green one\n slooooow...');
         break;
       case 'Gem Orange':
         console.log('you hit a orange one\n one is missing :-)');
         allEnemies.shift();
+        message('you hit a orange one\n one is missing :-)');
         break;
       default:
     }
@@ -213,12 +227,12 @@ class Goodies {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-vw = new Enemy();
+var vw = new Enemy();
 let allEnemies = [];
 let id = 0;
 
 function addEnemy() {
-  let enemy = Object.create(vw);
+  let enemy = new Enemy;
   enemy.randomize();
   allEnemies.push(enemy);
 }
@@ -236,13 +250,11 @@ function dropItem() {
       x: getRandomIntInclusive(1, 3),
       y: getRandomIntInclusive(0, 4)
     };
-    if (
-      forbiddenPosition.every(e => {
+    if (forbiddenPosition.every(e => {
         // debug
         // console.log(Object.values(e), Object.values(rand));
         return !_.isEqual(e, rand);
-      })
-    ) {
+      })) {
       position = rand;
       doppelganger = false;
       forbiddenPosition.push(position);
@@ -289,3 +301,4 @@ document.addEventListener('keyup', function(e) {
   };
   player.handleInput(allowedKeys[e.keyCode]);
 });
+// const test = new Core( 'images/char-boy.png', 34 , 34);

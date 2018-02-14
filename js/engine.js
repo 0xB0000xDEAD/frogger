@@ -147,6 +147,7 @@ var Engine = (function(global) {
     items.forEach(function(e) {
       e.render();
     });
+    // test.render();
   }
   /* This function does nothing but it could have been a good place to
    * handle game reset states - maybe a new game menu or a game over screen
