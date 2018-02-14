@@ -14,6 +14,7 @@ class Core {
     this.x = x;
     this.y = y;
   }
+
   // Draw the enemy on the screen, required method for game
   render() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -30,16 +31,18 @@ class Enemy extends Core {
     this.yOffset = 20;
     this.speed = 1;
   }
+
   // randomize the starting point for the enemy
   randomize() {
     this.x = getRandomIntInclusive(0, 4) * 101;
     this.y = getRandomIntInclusive(1, 3) * 83 - this.yOffset;
     this.speed = getRandomIntInclusive(1, 10);
   }
+
   // Update the enemy's position, required method for game
   // Parameter: dt, a time delta between ticks
   update(dt) {
-    let endGameField = 505;
+    const endGameField = 505;
     if (this.x > endGameField) {
       this.x = -200;
     }
@@ -53,7 +56,13 @@ class Player extends Core {
   constructor(name) {
     super();
     this.name = name;
-    this.skins = ['char-boy', 'char-cat-girl', 'char-horn-girl', 'char-pink-girl', 'char-princess-girl'];
+    this.skins = [
+      'char-boy',
+      'char-cat-girl',
+      'char-horn-girl',
+      'char-pink-girl',
+      'char-princess-girl'
+    ];
     this.sprite = `images/${this.skins[0]}.png`;
     this.yOffset = 10;
     this.heigth = 83;
@@ -64,46 +73,55 @@ class Player extends Core {
     this.y = this.y0;
     this.oneTimeFlag = 0;
   }
+
   // invoked when [P] is pressed. Change the player skin.
   switchPlayer() {
-    let firstOut = this.skins.shift();
+    const firstOut = this.skins.shift();
     this.skins.push(firstOut);
     this.sprite = `images/${this.skins[0]}.png`;
   }
+
   render() {
     ctx.fillStyle = 'black';
     ctx.font = '20px serif';
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     ctx.fillText(outputText, xMsg, yMsg);
   }
+
   //ending animation
   onWater() {
     //store the current skin
-    let currentSkin = this.sprite;
+    const currentSkin = this.sprite;
     // the following while loop ensures the ending animtion start
     // only one time till the game rest
     while (this.oneTimeFlag == 0) {
       message('water is so blue...', 10, 600);
       // a transparent skin (dummy.png) makes the player blink when you win the game
-      let intervalId = setInterval(() => {
-        this.sprite = this.sprite == currentSkin ? 'images/dummy.png' : currentSkin;
+      const intervalId = setInterval(() => {
+        this.sprite =
+          this.sprite == currentSkin ? 'images/dummy.png' : currentSkin;
       }, 200);
       this.oneTimeFlag = 1;
-      let timeoutId = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         clearInterval(intervalId);
         this.reset(currentSkin);
       }, 1500);
     }
   }
+
   update() {
-    allEnemies.forEach(e => {
-      if (this.x + this.collisionOffset < e.x + 101 && this.x + this.collisionOffset + 101 > e.x && e.y == this.y - this.yOffset) {
+    allEnemies.forEach((e) => {
+      if (
+        this.x + this.collisionOffset < e.x + 101 &&
+        this.x + this.collisionOffset + 101 > e.x &&
+        e.y == this.y - this.yOffset
+      ) {
         // debug the collision point
         // console.log('collision at: ' + (e.x + 101).toString());
         this.reset(this.sprite);
       }
     });
-    items.forEach(e => {
+    items.forEach((e) => {
       if (this.x == e.x - 25 && this.y == e.y - 45) {
         e.handleCollision(e.id);
       }
@@ -112,6 +130,7 @@ class Player extends Core {
       this.onWater();
     }
   }
+
   reset(currentSkin) {
     this.y = this.y0;
     this.oneTimeFlag = 0;
@@ -121,6 +140,7 @@ class Player extends Core {
     populateEnemies();
     populateItems();
   }
+
   handleInput(key) {
     switch (key) {
       case 'right':
@@ -154,6 +174,7 @@ class Player extends Core {
         }
       case 'switchPlayer':
         this.switchPlayer();
+        break;
       default:
     }
   }
@@ -167,13 +188,14 @@ function message(string, x = 10, y = 40) {
   yMsg = y;
   ctx.fillStyle = 'black';
   ctx.font = '30px serif';
-  let intervalId = setInterval(() => {
+  const intervalId = setInterval(() => {
     outputText = outputText == '' ? string : '';
   }, 200);
-  let timeoutId = setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     clearInterval(intervalId);
     outputText = '';
-    xMsg, yMsg = 0;
+    xMsg = 0;
+    yMsg = 0;
   }, 2000);
 }
 // items class
@@ -193,14 +215,21 @@ class Goodies extends Core {
     this.x = this.col * 101 - this.xOffset;
     this.y = this.row * 83 - this.yOffset;
   }
+
   render() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y, this.width, this.heigth);
+    ctx.drawImage(
+      Resources.get(this.sprite),
+      this.x,
+      this.y,
+      this.width,
+      this.heigth
+    );
   }
-  update(dt) {}
+
+  update() {}
+
   handleCollision(id) {
-    let temp = items.filter(e => {
-      return !(e.id == id);
-    });
+    const temp = items.filter((e) => !(e.id == id));
     items = temp;
     switch (this.type) {
       case 'Gem Blue':
@@ -210,7 +239,7 @@ class Goodies extends Core {
         break;
       case 'Gem Green':
         console.log('you hit a green one\n slooooow...');
-        allEnemies.forEach(e => {
+        allEnemies.forEach((e) => {
           e.speed--;
         });
         message('you hit a green one\n slooooow...');
@@ -227,34 +256,30 @@ class Goodies extends Core {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var vw = new Enemy();
 let allEnemies = [];
 let id = 0;
 
 function addEnemy() {
-  let enemy = new Enemy;
+  const enemy = new Enemy();
   enemy.randomize();
   allEnemies.push(enemy);
 }
 let items = [];
 const possibleItems = ['Gem Orange', 'Gem Green', 'Gem Blue'];
 // take care that no gem drops over another one
-let forbiddenPosition = [];
+const forbiddenPosition = [];
 
 function dropItem() {
-  let type = possibleItems[getRandomIntInclusive(0, possibleItems.length - 1)];
+  const type =
+    possibleItems[getRandomIntInclusive(0, possibleItems.length - 1)];
   let position = {};
   let doppelganger = true;
   while (doppelganger == true) {
-    let rand = {
+    const rand = {
       x: getRandomIntInclusive(1, 3),
       y: getRandomIntInclusive(0, 4)
     };
-    if (forbiddenPosition.every(e => {
-        // debug
-        // console.log(Object.values(e), Object.values(rand));
-        return !_.isEqual(e, rand);
-      })) {
+    if (forbiddenPosition.every((e) => !_.isEqual(e, rand))) {
       position = rand;
       doppelganger = false;
       forbiddenPosition.push(position);
@@ -262,7 +287,7 @@ function dropItem() {
       doppelganger = true;
     }
   }
-  let gem = new Goodies(id++, type, position.x, position.y);
+  const gem = new Goodies(id++, type, position.x, position.y);
   // let gem = new Goodies(id++, type, getRandomIntInclusive(1, 3), getRandomIntInclusive(0, 4));
   items.push(gem);
 }
@@ -278,16 +303,8 @@ function populateItems() {
     dropItem();
   }
 }
-
-function shuffle() {
-  setInterval(() => {
-    allEnemies.forEach(e => {});
-    populateEnemies();
-  }, 5000);
-}
 populateEnemies();
 populateItems();
-// shuffle();
 var player = new Player();
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
