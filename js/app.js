@@ -159,7 +159,7 @@ class Player extends Core {
         }
       case 'up':
         if (this.y == -10) {
-          player.onWater();
+          this.onWater();
           break;
         } else {
           this.y -= this.heigth;
